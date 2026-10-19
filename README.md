@@ -1,25 +1,12 @@
-# Class-Balanced LightGBM vs RBF Network for Credit Risk Flagging
+# German credit: RBF network baseline vs calibrated LightGBM
 
-This experiment is motivated by "The Use of Neural Network Technologies in the Tasks of Controlling IT Risks of a Credit Institution Based on Radial-basis Functions" (2024), which proposes radial-basis function neural networks for monitoring risk in credit institutions. This repository asks whether a gradient-boosted tree model with class balancing, cross-validated tuning and probability calibration can flag risky credit cases better than a standard RBF network.
+Script: `analysis.py`. Requirements: `requirements.txt`.
 
-**Question:** Can a class-balanced, cross-validation-tuned LightGBM model beat a standard radial-basis-function neural network at flagging risky cases on the public German credit dataset?
+Run `python analysis.py`. It downloads OpenML dataset 31 (German credit), makes a stratified 70/30 split (seed 42), tunes both models by 3-fold CV on the training set only, evaluates once on the test set over seeds 42-44, and writes `results.json` and `figures/baseline_vs_improved.png`.
 
-**Dataset:** German Credit (OpenML id 31, https://www.openml.org/d/31), loaded with the `openml` package. It is a public stand-in for credit-institution risk monitoring, not the paper's own data. The target is good vs bad credit risk. A stratified 70/30 split with seed 42 is used.
+Metric: macro-F1 on the test set (higher is better).
 
-**Baseline:** a standard RBF network with k-means centres, Gaussian activations and a logistic-regression output layer. The number of centres and the width are chosen by 3-fold CV on the training data.
-
-**Improved model:** a class-balanced LightGBM with hyperparameters tuned by randomized 3-fold CV on the training data, and sigmoid-calibrated probabilities.
-
-**Metrics:** macro-F1 (main), with risky-class F1, ROC-AUC and log-loss as secondary metrics.
-
-## How to run
-
-```bash
-pip install -r requirements.txt
-python analysis.py
-```
-
-Results are written to results.json (and a chart to figures/baseline_vs_improved.png).
+Fix in this revision: categorical columns are now detected by dtype (non-numeric) rather than `dtype == object`, and nominal byte strings are decoded regardless of pandas string dtype. Previously, on newer pandas, the categorical columns were treated as numeric and the scaler failed on values such as `'0<=X<200'`. The method, models, baseline and split are unchanged.
 
 ## Reference
 

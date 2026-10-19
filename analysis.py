@@ -48,6 +48,11 @@ def fetch(url):
     return r.content
 
 
+def is_categorical(s):
+    """Nominal/string columns are categorical; anything numeric is not."""
+    return not pd.api.types.is_numeric_dtype(s)
+
+
 def load_data():
     """Load OpenML dataset 31: metadata via the openml package, ARFF file via requests."""
     print("Loading German credit (OpenML id 31) ...")
@@ -60,16 +65,18 @@ def load_data():
     data, _ = arff.loadarff(path)
     os.remove(path)
     df = pd.DataFrame(data)
-    for c in df.columns:  # decode nominal byte strings
-        if df[c].dtype == object:
-            df[c] = df[c].apply(lambda v: v.decode() if isinstance(v, bytes) else v)
+    for c in df.columns:  # decode nominal byte strings (works for object or pandas string dtypes)
+        if is_categorical(df[c]):
+            df[c] = pd.Series(
+                [v.decode() if isinstance(v, bytes) else v for v in df[c].tolist()],
+                index=df.index, dtype=object)
     y = (df.pop("class") == "bad").astype(int).to_numpy()  # positive class = risky ("bad")
     return df, y
 
 
 def make_preprocessor(X_train):
     """Standardise numeric columns and one-hot encode categoricals (fit later on train folds only)."""
-    cat = [c for c in X_train.columns if X_train[c].dtype == object]
+    cat = [c for c in X_train.columns if is_categorical(X_train[c])]
     num = [c for c in X_train.columns if c not in cat]
     return ColumnTransformer([
         ("num", StandardScaler(), num),
