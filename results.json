@@ -1,0 +1,31 @@
+{
+  "question": "Can a class-balanced, cross-validation-tuned LightGBM model beat a standard radial-basis-function neural network at flagging risky cases on the public German credit dataset?",
+  "method": "Stratified 70/30 split (seed 42); preprocessing fit on train only; baseline RBF net and improved LightGBM tuned by 3-fold CV on train; test set used once; seeds 42-44.",
+  "dataset": {
+    "name": "German Credit (OpenML id 31)",
+    "source_url": "https://www.openml.org/d/31",
+    "n_rows": 1000,
+    "n_train": 700,
+    "n_test": 300,
+    "same_as_paper": false,
+    "baseline_is_papers_method": false
+  },
+  "metric_name": "macro-F1 (test set)",
+  "higher_is_better": true,
+  "baseline": "Standard RBF network: k-means centres, Gaussian RBF activations, logistic-regression output; number of centres and width chosen by CV on train.",
+  "improved": "Class-balanced LightGBM with hyperparameters tuned by randomized CV search on train and sigmoid-calibrated probabilities.",
+  "metrics": {
+    "baseline_score": 0.411764705882353,
+    "improved_score": 0.6414069082671124,
+    "improvement": 0.22964220238475946,
+    "baseline_score_std": 5.551115123125783e-17,
+    "improved_score_std": 0.017545237402336555,
+    "baseline_f1": 0.0,
+    "improved_f1": 0.4411514051416728,
+    "baseline_auc": 0.667257495590829,
+    "improved_auc": 0.7847971781305114,
+    "baseline_logloss": 0.5848797887329112,
+    "improved_logloss": 0.5050031186544274
+  },
+  "notes": "German credit is a stand-in for the paper's IT-risk data, not the paper's own dataset. Predictions use the default 0.5 threshold (argmax). The test set has only ~300 rows, so differences are noisy. Seeds vary model randomness only; the split is fixed. Secondary metrics are seed means. seed 42: RBF best {'rbf__n_centers': 10, 'rbf__width_scale': 2.0}; LightGBM best {'lgbm__reg_lambda': 0.0, 'lgbm__num_leaves': 7, 'lgbm__n_estimators': 200, 'lgbm__min_child_samples': 10, 'lgbm__learning_rate': 0.05} | seed 43: RBF best {'rbf__n_centers': 10, 'rbf__width_scale': 0.5}; LightGBM best {'lgbm__reg_lambda': 1.0, 'lgbm__num_leaves': 31, 'lgbm__n_estimators': 100, 'lgbm__min_child_samples': 5, 'lgbm__learning_rate': 0.05} | seed 44: RBF best {'rbf__n_centers': 10, 'rbf__width_scale': 2.0}; LightGBM best {'lgbm__reg_lambda': 1.0, 'lgbm__num_leaves': 15, 'lgbm__n_estimators': 400, 'lgbm__min_child_samples': 5, 'lgbm__learning_rate': 0.1}"
+}
